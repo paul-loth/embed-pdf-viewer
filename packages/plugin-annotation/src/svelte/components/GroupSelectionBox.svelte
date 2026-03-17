@@ -582,7 +582,7 @@
     {/if}
 
     <!-- Group selection menu -->
-    {#if shouldShowMenu}
+    {#if shouldShowMenu && !rotationActive}
       <CounterRotate
         rect={{
           origin: {

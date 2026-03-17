@@ -88,7 +88,7 @@
     </div>
 
     <!-- Group selection menu -->
-    <CounterRotate v-if="shouldShowMenu" :rect="menuRect" :rotation="rotation">
+    <CounterRotate v-if="shouldShowMenu && !rotationActive" :rect="menuRect" :rotation="rotation">
       <template #default="{ rect, menuWrapperProps }">
         <!-- Priority 1: Render function prop (schema-driven) -->
         <component v-if="groupSelectionMenu" :is="renderGroupMenu(rect, menuWrapperProps)" />

@@ -551,7 +551,7 @@ export function GroupSelectionBox({
         )}
 
       {/* Group selection menu */}
-      {groupSelectionMenu && (
+      {groupSelectionMenu && !rotationActive && (
         <CounterRotate
           rect={{
             origin: {
