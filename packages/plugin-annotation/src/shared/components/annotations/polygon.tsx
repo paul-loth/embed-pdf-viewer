@@ -41,7 +41,7 @@ export function Polygon({
   appearanceActive = false,
   cloudyBorderIntensity,
 }: PolygonProps): JSX.Element {
-  const isCloudy = (cloudyBorderIntensity ?? 0) > 0 && !currentVertex;
+  const isCloudy = (cloudyBorderIntensity ?? 0) > 0;
   const allPoints = currentVertex ? [...vertices, currentVertex] : vertices;
 
   const localPts = useMemo(
@@ -61,9 +61,9 @@ export function Polygon({
   }, [localPts, currentVertex]);
 
   const cloudyPath = useMemo(() => {
-    if (!isCloudy || vertices.length < 3) return null;
-    return generateCloudyPolygonPath(vertices, rect.origin, cloudyBorderIntensity!, strokeWidth);
-  }, [isCloudy, vertices, rect.origin, cloudyBorderIntensity, strokeWidth]);
+    if (!isCloudy || allPoints.length < 3) return null;
+    return generateCloudyPolygonPath(allPoints, rect.origin, cloudyBorderIntensity!, strokeWidth);
+  }, [isCloudy, allPoints, rect.origin, cloudyBorderIntensity, strokeWidth]);
 
   const isPreviewing = currentVertex && vertices.length > 0;
 
@@ -87,7 +87,7 @@ export function Polygon({
     >
       {/* Hit area -- always rendered, transparent, wider stroke for mobile */}
       <path
-        d={pathData}
+        d={isCloudy && cloudyPath ? cloudyPath.path : pathData}
         fill="transparent"
         stroke="transparent"
         strokeWidth={hitStrokeWidth}

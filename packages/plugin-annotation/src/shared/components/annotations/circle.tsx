@@ -98,24 +98,42 @@ export function Circle({
       overflow="visible"
     >
       {/* Hit area -- always rendered, transparent, wider stroke for mobile */}
-      <ellipse
-        cx={cx}
-        cy={cy}
-        rx={rx}
-        ry={ry}
-        fill="transparent"
-        stroke="transparent"
-        strokeWidth={hitStrokeWidth}
-        onPointerDown={onClick}
-        style={{
-          cursor: isSelected ? 'move' : 'pointer',
-          pointerEvents: isSelected
-            ? 'none'
-            : color === 'transparent'
-              ? 'visibleStroke'
-              : 'visible',
-        }}
-      />
+      {isCloudy && cloudyPath ? (
+        <path
+          d={cloudyPath.path}
+          fill="transparent"
+          stroke="transparent"
+          strokeWidth={hitStrokeWidth}
+          onPointerDown={onClick}
+          style={{
+            cursor: isSelected ? 'move' : 'pointer',
+            pointerEvents: isSelected
+              ? 'none'
+              : color === 'transparent'
+                ? 'visibleStroke'
+                : 'visible',
+          }}
+        />
+      ) : (
+        <ellipse
+          cx={cx}
+          cy={cy}
+          rx={rx}
+          ry={ry}
+          fill="transparent"
+          stroke="transparent"
+          strokeWidth={hitStrokeWidth}
+          onPointerDown={onClick}
+          style={{
+            cursor: isSelected ? 'move' : 'pointer',
+            pointerEvents: isSelected
+              ? 'none'
+              : color === 'transparent'
+                ? 'visibleStroke'
+                : 'visible',
+          }}
+        />
+      )}
       {/* Visual -- hidden when AP active, never interactive */}
       {!appearanceActive &&
         (isCloudy && cloudyPath ? (

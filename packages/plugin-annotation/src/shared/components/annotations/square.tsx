@@ -96,24 +96,42 @@ export function Square({
       overflow="visible"
     >
       {/* Hit area -- always rendered, transparent, wider stroke for mobile */}
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        fill="transparent"
-        stroke="transparent"
-        strokeWidth={hitStrokeWidth}
-        onPointerDown={onClick}
-        style={{
-          cursor: isSelected ? 'move' : 'pointer',
-          pointerEvents: isSelected
-            ? 'none'
-            : color === 'transparent'
-              ? 'visibleStroke'
-              : 'visible',
-        }}
-      />
+      {isCloudy && cloudyPath ? (
+        <path
+          d={cloudyPath.path}
+          fill="transparent"
+          stroke="transparent"
+          strokeWidth={hitStrokeWidth}
+          onPointerDown={onClick}
+          style={{
+            cursor: isSelected ? 'move' : 'pointer',
+            pointerEvents: isSelected
+              ? 'none'
+              : color === 'transparent'
+                ? 'visibleStroke'
+                : 'visible',
+          }}
+        />
+      ) : (
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          fill="transparent"
+          stroke="transparent"
+          strokeWidth={hitStrokeWidth}
+          onPointerDown={onClick}
+          style={{
+            cursor: isSelected ? 'move' : 'pointer',
+            pointerEvents: isSelected
+              ? 'none'
+              : color === 'transparent'
+                ? 'visibleStroke'
+                : 'visible',
+          }}
+        />
+      )}
       {/* Visual -- hidden when AP active, never interactive */}
       {!appearanceActive &&
         (isCloudy && cloudyPath ? (

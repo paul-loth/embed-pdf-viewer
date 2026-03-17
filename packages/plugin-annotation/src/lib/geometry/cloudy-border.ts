@@ -324,21 +324,24 @@ function outputCurlTemplate(template: Point[], x: number, y: number, out: PathBu
 // ---------------------------------------------------------------------------
 
 function computeParamsPolygon(
-  advInterm: number,
-  advCorner: number,
+  idealRadius: number,
   k: number,
-  r: number,
   length: number,
-): { n: number; alpha: number; dx: number } {
-  if (length === 0) return { n: -1, alpha: ANGLE_34, dx: 0 };
+): { n: number; adjustedRadius: number } {
+  if (length === 0) return { n: -1, adjustedRadius: idealRadius };
 
-  const n = Math.ceil((length - 2 * advCorner) / advInterm);
-  const e = length - (2 * advCorner + n * advInterm);
-  const dx = e / 2;
-  const arg = (k * r + dx) / r;
-  const alpha = arg < -1 || arg > 1 ? 0 : Math.acos(arg);
+  const cornerSpace = 2 * k * idealRadius;
+  const remaining = length - cornerSpace;
 
-  return { n, alpha, dx };
+  if (remaining <= 0) {
+    return { n: 0, adjustedRadius: idealRadius };
+  }
+
+  const idealAdvance = 2 * k * idealRadius;
+  const n = Math.max(1, Math.round(remaining / idealAdvance));
+  const adjustedRadius = remaining / (n * 2 * k);
+
+  return { n, adjustedRadius };
 }
 
 function cloudyPolygonImpl(
@@ -369,42 +372,24 @@ function cloudyPolygonImpl(
     return;
   }
 
-  let cloudRadius = isEllipse
+  let idealRadius = isEllipse
     ? getEllipseCloudRadius(intensity, lineWidth)
     : getPolygonCloudRadius(intensity, lineWidth);
 
-  if (cloudRadius < 0.5) cloudRadius = 0.5;
+  if (idealRadius < 0.5) idealRadius = 0.5;
 
   const k = Math.cos(ANGLE_34);
-  const advIntermDefault = 2 * k * cloudRadius;
-  const advCornerDefault = k * cloudRadius;
 
   let anglePrev = 0;
-
-  // Find adjusted angle for first corner curl
-  const lastPt = polygon[numPoints - 2];
-  const firstPt = polygon[0];
-  const p0 = computeParamsPolygon(
-    advIntermDefault,
-    advCornerDefault,
-    k,
-    cloudRadius,
-    distance(lastPt, firstPt),
-  );
-  let alphaPrev = p0.n === 0 ? p0.alpha : ANGLE_34;
-
   let outputStarted = false;
 
   for (let j = 0; j + 1 < numPoints; j++) {
     const pt = polygon[j];
     const ptNext = polygon[j + 1];
     const len = distance(pt, ptNext);
-    if (len === 0) {
-      alphaPrev = ANGLE_34;
-      continue;
-    }
+    if (len === 0) continue;
 
-    const params = computeParamsPolygon(advIntermDefault, advCornerDefault, k, cloudRadius, len);
+    const params = computeParamsPolygon(idealRadius, k, len);
     if (params.n < 0) {
       if (!outputStarted) {
         out.moveTo(pt.x, pt.y);
@@ -413,8 +398,9 @@ function cloudyPolygonImpl(
       continue;
     }
 
-    const alpha = params.alpha;
-    const dx = params.dx;
+    const edgeRadius = Math.max(0.5, params.adjustedRadius);
+    const intermAdvance = 2 * k * edgeRadius;
+    const firstAdvance = k * idealRadius + k * edgeRadius;
 
     let angleCur = Math.atan2(ptNext.y - pt.y, ptNext.x - pt.x);
     if (j === 0) {
@@ -430,37 +416,40 @@ function cloudyPolygonImpl(
     addCornerCurl(
       anglePrev,
       angleCur,
-      cloudRadius,
+      idealRadius,
       pt.x,
       pt.y,
-      alpha,
-      alphaPrev,
+      ANGLE_34,
+      ANGLE_34,
       out,
       !outputStarted,
     );
     outputStarted = true;
 
-    const adv = 2 * k * cloudRadius + 2 * dx;
-    x += adv * cos;
-    y += adv * sin;
+    if (params.n === 0) {
+      x += 2 * k * idealRadius * cos;
+      y += 2 * k * idealRadius * sin;
+    } else {
+      x += firstAdvance * cos;
+      y += firstAdvance * sin;
 
-    let numInterm = params.n;
-    if (params.n >= 1) {
-      addFirstIntermediateCurl(angleCur, cloudRadius, alpha, x, y, out);
-      x += advIntermDefault * cos;
-      y += advIntermDefault * sin;
-      numInterm = params.n - 1;
-    }
+      let numInterm = params.n;
+      if (params.n >= 1) {
+        addFirstIntermediateCurl(angleCur, edgeRadius, ANGLE_34, x, y, out);
+        x += intermAdvance * cos;
+        y += intermAdvance * sin;
+        numInterm = params.n - 1;
+      }
 
-    const template = getIntermediateCurlTemplate(angleCur, cloudRadius);
-    for (let i = 0; i < numInterm; i++) {
-      outputCurlTemplate(template, x, y, out);
-      x += advIntermDefault * cos;
-      y += advIntermDefault * sin;
+      const template = getIntermediateCurlTemplate(angleCur, edgeRadius);
+      for (let i = 0; i < numInterm; i++) {
+        outputCurlTemplate(template, x, y, out);
+        x += intermAdvance * cos;
+        y += intermAdvance * sin;
+      }
     }
 
     anglePrev = angleCur;
-    alphaPrev = params.n === 0 ? alpha : ANGLE_34;
   }
 }
 
@@ -683,6 +672,24 @@ function computeParamsEllipse(pt: Point, ptNext: Point, r: number, curlAdv: numb
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
+
+/**
+ * Returns the per-side outward extent of a cloudy border (how far the
+ * scallop peaks + stroke extend beyond the inner shape boundary).
+ *
+ * Use this to compute `rectangleDifferences` for Square/Circle or the
+ * padding for Polygon Rect computation.
+ */
+export function getCloudyBorderExtent(
+  intensity: number,
+  lineWidth: number,
+  isEllipse: boolean,
+): number {
+  const cloudRadius = isEllipse
+    ? getEllipseCloudRadius(intensity, lineWidth)
+    : getPolygonCloudRadius(intensity, lineWidth);
+  return cloudRadius + lineWidth / 2;
+}
 
 /**
  * Generates a cloudy border SVG path for a rectangle (Square annotation).
