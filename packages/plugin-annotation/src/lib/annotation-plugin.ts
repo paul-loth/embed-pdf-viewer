@@ -647,7 +647,6 @@ export class AnnotationPlugin extends BasePlugin<
   private getAllAnnotations(documentId: string, doc: PdfDocumentObject) {
     const task = this.engine.getAllAnnotations(doc);
     task.wait((annotations) => {
-      console.log('all annotations', annotations);
       this.dispatch(setAnnotations(documentId, annotations));
 
       // Mark initial load as complete
