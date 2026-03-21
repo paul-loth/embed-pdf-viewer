@@ -194,6 +194,9 @@ export class FormPlugin extends BasePlugin<
   ): void {
     if (!this.annotation || !patch.field) return;
 
+    const widget = annotation as PdfWidgetAnnoObject;
+    if (widget.field?.type === PDF_FORM_FIELD_TYPE.RADIOBUTTON) return;
+
     const fieldPatch = patch.field;
 
     const siblings = this.getFieldSiblings(annotation.id, documentId);

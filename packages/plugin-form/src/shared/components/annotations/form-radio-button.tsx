@@ -52,7 +52,7 @@ export function FormRadioButton({
             width: '50%',
             height: '50%',
             borderRadius: '50%',
-            background: object.strokeColor ?? '#000000',
+            background: '#000000',
           }}
         />
       )}

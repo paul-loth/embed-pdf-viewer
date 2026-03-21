@@ -41,19 +41,16 @@ export function FormCheckbox({ annotation, isSelected, scale, onClick, style }: 
     >
       {isChecked && (
         <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={3}
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          viewBox="0 0 100 100"
           style={{
-            width: '70%',
-            height: '70%',
-            color: object.strokeColor ?? '#000000',
+            width: '100%',
+            height: '100%',
           }}
         >
-          <polyline points="20 6 9 17 4 12" />
+          <path
+            d="M28 48C27.45 50.21 29.45 63.13 30 67C30.55 69.21 34.58 72 39 72C44.52 71.45 76.55 32.55 76 32C77.1 31.45 76 25 76 25C74.34 22.24 68 25.45 68 26C68 26 43.55 53 43 53C41.34 53 40.55 41.1 40 40C33.37 36.69 29.1 45.79 28 48Z"
+            fill="#000000"
+          />
         </svg>
       )}
     </div>
