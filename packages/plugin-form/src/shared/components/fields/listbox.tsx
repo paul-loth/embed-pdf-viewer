@@ -55,7 +55,6 @@ export function ListboxField(props: ListboxFieldProps) {
   return (
     <div
       ref={inputRef as (el: HTMLDivElement | null) => void}
-      tabIndex={0}
       onBlur={onBlur}
       style={containerStyle}
     >

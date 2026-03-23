@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from '@framework';
+import { useCallback, useEffect, useRef, useState } from '@framework';
 import { PdfWidgetAnnoObject } from '@embedpdf/models';
 import { AnnotationRendererProps } from '@embedpdf/plugin-annotation/@framework';
 import { useFormWidgetState } from '../../hooks/use-form-widget-state';
@@ -12,18 +12,17 @@ export function TextFillMode(props: AnnotationRendererProps<PdfWidgetAnnoObject>
     useFormWidgetState(props);
   const formState = useFormDocumentState(props.documentId);
   const [editing, setEditing] = useState(false);
+  const inputRef = useRef<HTMLElement | null>(null);
 
   const isFocused = formState.selectedFieldId === annotation.id;
 
   useEffect(() => {
-    if (isFocused && !editing && !isReadOnly) {
-      setEditing(true);
-    } else if (!isFocused && editing) {
-      setEditing(false);
+    if (isFocused && inputRef.current && document.activeElement !== inputRef.current) {
+      inputRef.current.focus();
     }
   }, [isFocused]);
 
-  const handleClick = useCallback(() => {
+  const handleFocus = useCallback(() => {
     if (isReadOnly) return;
     scope?.selectField(annotation.id);
     setEditing(true);
@@ -36,19 +35,19 @@ export function TextFillMode(props: AnnotationRendererProps<PdfWidgetAnnoObject>
     }
   }, [scope, annotation.id]);
 
-  const focusRef = useCallback((el: HTMLElement | null) => {
-    if (el) el.focus();
+  const handleInputRef = useCallback((el: HTMLElement | null) => {
+    inputRef.current = el;
   }, []);
 
   return (
     <div
-      onClick={handleClick}
       style={{
         width: '100%',
         height: '100%',
         overflow: 'hidden',
-        cursor: isReadOnly ? 'default' : 'pointer',
+        position: 'relative',
         pointerEvents: 'auto',
+        outline: 'none',
       }}
     >
       <RenderWidget
@@ -56,19 +55,32 @@ export function TextFillMode(props: AnnotationRendererProps<PdfWidgetAnnoObject>
         annotation={annotation}
         scaleFactor={scale}
         renderKey={renderKey}
-        style={{ pointerEvents: 'none', visibility: editing ? 'hidden' : 'visible' }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          visibility: editing ? 'hidden' : 'visible',
+        }}
       />
-      {editing && (
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 1,
+          opacity: editing ? 1 : 0,
+        }}
+      >
         <TextField
           annotation={annotation as TextFieldProps['annotation']}
           scale={scale}
           pageIndex={pageIndex}
           isEditable={true}
           onChangeField={handleChangeField}
+          onFocus={handleFocus}
           onBlur={handleBlur}
-          inputRef={focusRef}
+          inputRef={handleInputRef}
         />
-      )}
+      </div>
     </div>
   );
 }

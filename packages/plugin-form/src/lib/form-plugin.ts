@@ -44,7 +44,6 @@ import {
   AnnotationPlugin,
 } from '@embedpdf/plugin-annotation';
 import { Command, HistoryCapability, HistoryPlugin } from '@embedpdf/plugin-history';
-import { ScrollCapability, ScrollPlugin } from '@embedpdf/plugin-scroll';
 import { initialDocumentState } from './reducer';
 import { formTools } from './tools';
 
@@ -60,7 +59,6 @@ export class FormPlugin extends BasePlugin<
 
   private annotation: AnnotationCapability | null = null;
   private history: HistoryCapability | null = null;
-  private scroll: ScrollCapability | null = null;
 
   private readonly state$ = createScopedEmitter<FormDocumentState, FormStateChangeEvent, string>(
     (documentId, state) => ({ documentId, state }),
@@ -92,7 +90,6 @@ export class FormPlugin extends BasePlugin<
 
     this.annotation = registry.getPlugin<AnnotationPlugin>('annotation')?.provides() ?? null;
     this.history = registry.getPlugin<HistoryPlugin>(HistoryPlugin.id)?.provides() ?? null;
-    this.scroll = registry.getPlugin<ScrollPlugin>(ScrollPlugin.id)?.provides() ?? null;
 
     if (this.annotation) {
       for (const tool of formTools) {
@@ -141,13 +138,11 @@ export class FormPlugin extends BasePlugin<
       shareField: (annotationId, targetAnnotationId, documentId?) =>
         this.shareFieldMethod(annotationId, targetAnnotationId, documentId),
       renderWidget: (options, documentId?) => this.renderWidget(options, documentId),
-      selectField: (annotationId, options?, documentId?) =>
-        this.selectFieldMethod(annotationId, options, documentId),
+      selectField: (annotationId, documentId?) => this.selectFieldMethod(annotationId, documentId),
       deselectField: (documentId?) => this.deselectFieldMethod(documentId),
       getSelectedFieldId: (documentId?) => this.getSelectedFieldId(documentId),
-      selectNextField: (options?, documentId?) => this.selectNextFieldMethod(options, documentId),
-      selectPreviousField: (options?, documentId?) =>
-        this.selectPreviousFieldMethod(options, documentId),
+      selectNextField: (documentId?) => this.selectNextFieldMethod(documentId),
+      selectPreviousField: (documentId?) => this.selectPreviousFieldMethod(documentId),
       activateField: (documentId?) => this.activateFieldMethod(documentId),
       getState: (documentId?) => this.getDocumentState(documentId),
       getFieldGroup: (annotationId, documentId?) => this.getFieldGroup(annotationId, documentId),
@@ -172,12 +167,11 @@ export class FormPlugin extends BasePlugin<
       shareField: (annotationId, targetAnnotationId) =>
         this.shareFieldMethod(annotationId, targetAnnotationId, documentId),
       renderWidget: (options) => this.renderWidget(options, documentId),
-      selectField: (annotationId, options?) =>
-        this.selectFieldMethod(annotationId, options, documentId),
+      selectField: (annotationId) => this.selectFieldMethod(annotationId, documentId),
       deselectField: () => this.deselectFieldMethod(documentId),
       getSelectedFieldId: () => this.getSelectedFieldId(documentId),
-      selectNextField: (options?) => this.selectNextFieldMethod(options, documentId),
-      selectPreviousField: (options?) => this.selectPreviousFieldMethod(options, documentId),
+      selectNextField: () => this.selectNextFieldMethod(documentId),
+      selectPreviousField: () => this.selectPreviousFieldMethod(documentId),
       activateField: () => this.activateFieldMethod(documentId),
       getState: () => this.getDocumentState(documentId),
       getFieldGroup: (annotationId) => this.getFieldGroup(annotationId, documentId),
@@ -903,16 +897,9 @@ export class FormPlugin extends BasePlugin<
     return resultTask;
   }
 
-  private selectFieldMethod(
-    annotationId: string,
-    options?: { scroll?: boolean },
-    documentId?: string,
-  ): void {
+  private selectFieldMethod(annotationId: string, documentId?: string): void {
     const docId = documentId ?? this.getActiveDocumentId();
     this.dispatch(selectFieldAction(docId, annotationId));
-    if (options?.scroll) {
-      this.scrollToField(annotationId, docId);
-    }
   }
 
   private deselectFieldMethod(documentId?: string): void {
@@ -924,7 +911,7 @@ export class FormPlugin extends BasePlugin<
     return this.getDocumentState(documentId).selectedFieldId;
   }
 
-  private selectNextFieldMethod(options?: { scroll?: boolean }, documentId?: string): void {
+  private selectNextFieldMethod(documentId?: string): void {
     const docId = documentId ?? this.getActiveDocumentId();
     const ordered = this.orderedFieldIndex.get(docId);
     if (!ordered || ordered.length === 0) return;
@@ -938,12 +925,9 @@ export class FormPlugin extends BasePlugin<
 
     const next = ordered[nextIndex];
     this.dispatch(selectFieldAction(docId, next.annotationId));
-    if (options?.scroll) {
-      this.scrollToField(next.annotationId, docId);
-    }
   }
 
-  private selectPreviousFieldMethod(options?: { scroll?: boolean }, documentId?: string): void {
+  private selectPreviousFieldMethod(documentId?: string): void {
     const docId = documentId ?? this.getActiveDocumentId();
     const ordered = this.orderedFieldIndex.get(docId);
     if (!ordered || ordered.length === 0) return;
@@ -960,9 +944,6 @@ export class FormPlugin extends BasePlugin<
 
     const prev = ordered[prevIndex];
     this.dispatch(selectFieldAction(docId, prev.annotationId));
-    if (options?.scroll) {
-      this.scrollToField(prev.annotationId, docId);
-    }
   }
 
   private activateFieldMethod(documentId?: string): void {
@@ -988,23 +969,6 @@ export class FormPlugin extends BasePlugin<
         );
       }
     }
-  }
-
-  private scrollToField(annotationId: string, documentId: string): void {
-    if (!this.scroll) return;
-    const widget = this.resolveWidgetAnnotation(annotationId, documentId);
-    if (!widget) return;
-
-    this.scroll.forDocument(documentId).scrollToPage({
-      pageNumber: widget.pageIndex + 1,
-      pageCoordinates: {
-        x: widget.rect.origin.x,
-        y: widget.rect.origin.y,
-      },
-      alignX: 50,
-      alignY: 50,
-      behavior: 'smooth',
-    });
   }
 
   private renderWidget(

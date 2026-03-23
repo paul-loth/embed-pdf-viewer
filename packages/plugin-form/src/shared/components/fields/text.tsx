@@ -58,6 +58,7 @@ interface CombFieldProps {
   caretIndex: number;
   containerStyle: CSSProperties;
   cellFontStyle: CSSProperties;
+  onFocus?: () => void;
   onChange: (evt: FormEvent) => void;
   onBlur?: () => void;
 }
@@ -76,6 +77,7 @@ function CombField(props: CombFieldProps) {
     caretIndex,
     containerStyle,
     cellFontStyle,
+    onFocus,
     onChange,
     onBlur,
   } = props;
@@ -101,6 +103,7 @@ function CombField(props: CombFieldProps) {
         aria-label={name}
         value={value}
         maxLength={maxLen}
+        onFocus={onFocus}
         onChange={onChange}
         onBlur={onBlur}
         style={combHiddenInputStyle}
@@ -132,7 +135,7 @@ function CombField(props: CombFieldProps) {
 }
 
 export function TextField(props: TextFieldProps) {
-  const { annotation, isEditable, onChangeField, onBlur, inputRef, scale } = props;
+  const { annotation, isEditable, onChangeField, onFocus, onBlur, inputRef, scale } = props;
   const field = annotation.field;
 
   const { flag } = field;
@@ -208,6 +211,7 @@ export function TextField(props: TextFieldProps) {
         caretIndex={caretIndex}
         containerStyle={combContainer}
         cellFontStyle={cellFont}
+        onFocus={onFocus}
         onChange={changeValue}
         onBlur={onBlur}
       />
@@ -225,6 +229,7 @@ export function TextField(props: TextFieldProps) {
       aria-label={name}
       value={localValue}
       maxLength={maxLen}
+      onFocus={onFocus}
       onChange={changeValue}
       onBlur={onBlur}
       style={{ ...textareaStyle, ...visualStyle }}
@@ -239,6 +244,7 @@ export function TextField(props: TextFieldProps) {
       aria-label={name}
       value={localValue}
       maxLength={maxLen}
+      onFocus={onFocus}
       onChange={changeValue}
       onBlur={onBlur}
       style={{ ...inputStyle, ...visualStyle }}

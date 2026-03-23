@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from '@framework';
+import { useCallback, useEffect, useRef, useState } from '@framework';
 import { PdfWidgetAnnoObject } from '@embedpdf/models';
 import { AnnotationRendererProps } from '@embedpdf/plugin-annotation/@framework';
 import { useFormWidgetState } from '../../hooks/use-form-widget-state';
@@ -12,33 +12,38 @@ export function ListboxFillMode(props: AnnotationRendererProps<PdfWidgetAnnoObje
     useFormWidgetState(props);
   const formState = useFormDocumentState(props.documentId);
   const [editing, setEditing] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const isFocused = formState.selectedFieldId === annotation.id;
 
   useEffect(() => {
-    if (isFocused && !editing && !isReadOnly) {
-      setEditing(true);
-    } else if (!isFocused && editing) {
-      setEditing(false);
+    if (isFocused && wrapperRef.current && !wrapperRef.current.contains(document.activeElement)) {
+      wrapperRef.current.focus();
     }
   }, [isFocused]);
 
-  const handleClick = useCallback(() => {
+  const handleFocus = useCallback(() => {
     if (isReadOnly) return;
     scope?.selectField(annotation.id);
     setEditing(true);
   }, [isReadOnly, scope, annotation.id]);
 
   const handleBlur = useCallback(() => {
-    setEditing(false);
-    if (scope?.getSelectedFieldId() === annotation.id) {
-      scope?.deselectField();
-    }
+    requestAnimationFrame(() => {
+      if (wrapperRef.current?.contains(document.activeElement)) return;
+      setEditing(false);
+      if (scope?.getSelectedFieldId() === annotation.id) {
+        scope?.deselectField();
+      }
+    });
   }, [scope, annotation.id]);
 
   return (
     <div
-      onClick={handleClick}
+      ref={wrapperRef}
+      tabIndex={isReadOnly ? -1 : 0}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       style={{
         width: '100%',
         height: '100%',
@@ -55,7 +60,6 @@ export function ListboxFillMode(props: AnnotationRendererProps<PdfWidgetAnnoObje
         pageIndex={pageIndex}
         isEditable={true}
         onChangeField={handleChangeField}
-        onBlur={handleBlur}
       />
       {!editing && (
         <RenderWidget

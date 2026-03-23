@@ -15,6 +15,7 @@ export interface FieldProps {
   pageIndex: number;
   isEditable: boolean;
   onChangeField?: (field: PdfWidgetAnnoField) => void;
+  onFocus?: () => void;
   onBlur?: () => void;
   inputRef?: (el: HTMLElement | null) => void;
 }

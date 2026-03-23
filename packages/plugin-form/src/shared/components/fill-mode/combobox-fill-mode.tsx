@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef } from '@framework';
 import { PdfWidgetAnnoObject } from '@embedpdf/models';
 import { AnnotationRendererProps } from '@embedpdf/plugin-annotation/@framework';
 import { useFormWidgetState } from '../../hooks/use-form-widget-state';
@@ -10,12 +11,39 @@ export function ComboboxFillMode(props: AnnotationRendererProps<PdfWidgetAnnoObj
   const { annotation, scale, pageIndex, scope, handleChangeField, renderKey, isReadOnly } =
     useFormWidgetState(props);
   const formState = useFormDocumentState(props.documentId);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const selectElRef = useRef<HTMLElement | null>(null);
 
   const isFocused = formState.selectedFieldId === annotation.id;
 
+  useEffect(() => {
+    if (isFocused && wrapperRef.current && !wrapperRef.current.contains(document.activeElement)) {
+      (selectElRef.current ?? wrapperRef.current).focus();
+    }
+  }, [isFocused]);
+
+  const handleFocus = useCallback(() => {
+    scope?.selectField(annotation.id);
+  }, [scope, annotation.id]);
+
+  const handleBlur = useCallback(() => {
+    requestAnimationFrame(() => {
+      if (wrapperRef.current?.contains(document.activeElement)) return;
+      if (scope?.getSelectedFieldId() === annotation.id) {
+        scope?.deselectField();
+      }
+    });
+  }, [scope, annotation.id]);
+
+  const selectInputRef = useCallback((el: HTMLElement | null) => {
+    selectElRef.current = el;
+  }, []);
+
   return (
     <div
-      onClick={() => scope?.selectField(annotation.id)}
+      ref={wrapperRef}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       style={{
         width: '100%',
         height: '100%',
@@ -39,6 +67,7 @@ export function ComboboxFillMode(props: AnnotationRendererProps<PdfWidgetAnnoObj
         pageIndex={pageIndex}
         isEditable={true}
         onChangeField={handleChangeField}
+        inputRef={selectInputRef}
       />
     </div>
   );
