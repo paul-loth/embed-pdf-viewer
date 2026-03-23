@@ -144,6 +144,10 @@ export function TextField(props: TextFieldProps) {
 
   const [localValue, setLocalValue] = useState(value);
 
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
   const changeValue = useCallback(
     (evt: FormEvent) => {
       const newValue = (evt.target as HTMLInputElement).value;

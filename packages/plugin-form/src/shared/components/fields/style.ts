@@ -36,6 +36,7 @@ export const selectStyle: CSSProperties = {
 export const textareaStyle: CSSProperties = {
   ...baseInputStyle,
   resize: 'none',
+  lineHeight: 1.14,
 };
 
 export const buttonStyle: CSSProperties = baseStyle;

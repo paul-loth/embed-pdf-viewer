@@ -6,6 +6,7 @@ import { usePdfiumEngine } from '@embedpdf/engines/react'
 import {
   AnnotationLayer,
   AnnotationPluginPackage,
+  useAnnotation,
 } from '@embedpdf/plugin-annotation/react'
 import {
   InteractionManagerPluginPackage,
@@ -16,7 +17,6 @@ import {
   DocumentManagerPluginPackage,
 } from '@embedpdf/plugin-document-manager/react'
 import { RenderLayer, RenderPluginPackage } from '@embedpdf/plugin-render/react'
-import { ExportPluginPackage, useExport } from '@embedpdf/plugin-export/react'
 import { Scroller, ScrollPluginPackage } from '@embedpdf/plugin-scroll/react'
 import {
   SelectionLayer,
@@ -32,11 +32,10 @@ import {
   ZoomPluginPackage,
   ZoomMode,
 } from '@embedpdf/plugin-zoom/react'
-import {
-  FormPluginPackage,
-  useFormCapability,
-} from '@embedpdf/plugin-form/react'
-import { Download, Loader2, Wand2, Trash2, ZoomIn, ZoomOut } from 'lucide-react'
+import { FormPluginPackage } from '@embedpdf/plugin-form/react'
+import { Loader2, Lock, LockOpen, ZoomIn, ZoomOut } from 'lucide-react'
+
+const fillModeLock = { type: 'include' as const, categories: ['form'] }
 
 const plugins = [
   createPluginRegistration(DocumentManagerPluginPackage, {
@@ -45,9 +44,6 @@ const plugins = [
   createPluginRegistration(ViewportPluginPackage),
   createPluginRegistration(ScrollPluginPackage),
   createPluginRegistration(RenderPluginPackage),
-  createPluginRegistration(ExportPluginPackage, {
-    defaultFileName: 'form.pdf',
-  }),
   createPluginRegistration(ZoomPluginPackage, {
     defaultZoomLevel: ZoomMode.FitPage,
   }),
@@ -55,107 +51,32 @@ const plugins = [
   createPluginRegistration(SelectionPluginPackage),
   createPluginRegistration(HistoryPluginPackage),
   createPluginRegistration(AnnotationPluginPackage, {
-    locked: { type: 'include', categories: ['form'] },
+    locked: fillModeLock,
   }),
   createPluginRegistration(FormPluginPackage),
 ]
 
-const FormAutoFillToolbar = ({ documentId }: { documentId: string }) => {
-  const { provides: formCapability } = useFormCapability()
+const isFillMode = (locked: { type: string; categories?: string[] }) =>
+  locked.type === 'include' && locked.categories?.includes('form')
+
+const ModeToolbar = ({ documentId }: { documentId: string }) => {
+  const { state, provides } = useAnnotation(documentId)
   const { provides: zoom } = useZoom(documentId)
-  const { provides: exportApi } = useExport(documentId)
-
-  const handleFillDemoData = () => {
-    if (!formCapability) return
-    const scope = formCapability.forDocument(documentId)
-
-    const demoData: Record<string, string> = {
-      First_Name: 'Jane',
-      Last_Name: 'Doe',
-      Email_Address: 'jane.doe@example.com',
-      Phone_Number: '+1 (555) 123-4567',
-      Home_Address: '123 Main Street',
-      City: 'San Francisco',
-      State: 'CA',
-      Postal_Code: '94102',
-      Department: 'Design',
-      Employment_Type: 'Contract',
-      Office_Location: 'San Francisco',
-      Start_Date: '2026-04-01',
-      Programming_Languages: 'TypeScript, Rust, Go',
-      Framework_Tools: 'React, Node.js, Docker',
-      Comments:
-        'I would like to have a standing desk and a dual monitor setup.',
-      Equipment_Laptop: 'Yes',
-      Equipment_Monitor: 'Yes',
-      Equipment_Keyboard: 'Yes',
-      Equipment_Desk: 'Yes',
-      Access_Repository: 'Yes',
-      Access_Cloud: 'Yes',
-      Access_Internal: 'Yes',
-      Access_VPN: 'Yes',
-      Terms: 'Yes',
-      Preferred_Shift: '4f803c06-508d-4232-bd84-82452b6561f1',
-      Work_Arrangement: 'd43ec6d3-9e8c-403f-98d7-e2c818070ac4',
-    }
-
-    scope.setFormValues(demoData)
-  }
-
-  const handleClearForm = () => {
-    if (!formCapability) return
-    const scope = formCapability.forDocument(documentId)
-
-    const emptyData: Record<string, string> = {
-      First_Name: '',
-      Last_Name: '',
-      Email_Address: '',
-      Phone_Number: '',
-      Home_Address: '',
-      City: '',
-      State: '',
-      Postal_Code: '',
-      Department: 'Engineering',
-      Employment_Type: 'Full-time',
-      Office_Location: 'New York',
-      Start_Date: '',
-      Programming_Languages: '',
-      Framework_Tools: '',
-      Comments: '',
-      Equipment_Laptop: 'Off',
-      Equipment_Monitor: 'Off',
-      Equipment_Keyboard: 'Off',
-      Equipment_Desk: 'Off',
-      Access_Repository: 'Off',
-      Access_Cloud: 'Off',
-      Access_Internal: 'Off',
-      Access_VPN: 'Off',
-      Terms: 'Off',
-      Preferred_Shift: '1a5963ac-8d1e-4c83-9a8b-da53700e46c1',
-      Work_Arrangement: 'e424be12-71f7-4458-b1a3-a71a0b100729',
-    }
-
-    scope.setFormValues(emptyData)
-  }
+  const fillMode = isFillMode(state.locked)
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-300 bg-gray-100 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          onClick={handleFillDemoData}
-          className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+      <div className="flex items-center gap-2">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
+            fillMode
+              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+              : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
+          }`}
         >
-          <Wand2 size={16} />
-          Auto Fill Data
-        </button>
-
-        <button
-          onClick={handleClearForm}
-          className="flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-        >
-          <Trash2 size={16} />
-          Clear Form
-        </button>
+          {fillMode ? <Lock size={14} /> : <LockOpen size={14} />}
+          {fillMode ? 'Fill Mode' : 'Design Mode'}
+        </span>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -180,19 +101,21 @@ const FormAutoFillToolbar = ({ documentId }: { documentId: string }) => {
         </div>
 
         <button
-          onClick={() => exportApi?.download()}
-          disabled={!exportApi}
+          onClick={() =>
+            provides?.setLocked(fillMode ? { type: 'none' } : fillModeLock)
+          }
+          disabled={!provides}
           className="inline-flex items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Download size={16} />
-          Download PDF
+          {fillMode ? <LockOpen size={16} /> : <Lock size={16} />}
+          {fillMode ? 'Switch to Design Mode' : 'Switch to Fill Mode'}
         </button>
       </div>
     </div>
   )
 }
 
-export const FormImportViewer = () => {
+export const FormEditModeViewer = () => {
   const { engine, isLoading } = usePdfiumEngine()
 
   if (isLoading || !engine) {
@@ -215,15 +138,13 @@ export const FormImportViewer = () => {
           <DocumentContent documentId={activeDocumentId}>
             {({ isLoaded }) =>
               isLoaded && (
-                <div
-                  className="overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900"
-                  style={{ userSelect: 'none' }}
-                >
-                  {/* Toolbar */}
-                  <FormAutoFillToolbar documentId={activeDocumentId} />
+                <div className="overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                  <ModeToolbar documentId={activeDocumentId} />
 
-                  {/* PDF Viewer */}
-                  <div className="relative h-[420px] sm:h-[550px]">
+                  <div
+                    className="relative h-[420px] sm:h-[550px]"
+                    style={{ userSelect: 'none' }}
+                  >
                     <Viewport
                       documentId={activeDocumentId}
                       className="absolute inset-0 bg-gray-200 dark:bg-gray-800"

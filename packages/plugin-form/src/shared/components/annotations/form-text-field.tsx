@@ -35,6 +35,7 @@ export function FormTextField({
     isTextField &&
     !!(field.flag & PDF_FORM_FIELD_FLAG.TEXT_COMB) &&
     !!(field as PdfTextWidgetAnnoField).maxLen;
+  const isMultiline = isTextField && !!(field.flag & PDF_FORM_FIELD_FLAG.TEXT_MULTIPLINE);
   const maxLen = isTextField ? (field as PdfTextWidgetAnnoField).maxLen : undefined;
 
   const borderWidth = (object.strokeWidth ?? 1) * scale;
@@ -61,7 +62,7 @@ export function FormTextField({
         pointerEvents: 'auto',
         cursor: isSelected ? 'move' : 'pointer',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: isMultiline ? 'flex-start' : 'center',
         overflow: 'hidden',
         ...(!isComb ? { padding: `${borderWidth}px ${borderWidth}px` } : {}),
         ...style,
@@ -80,9 +81,13 @@ export function FormTextField({
         <span
           style={{
             ...fontStyle,
-            whiteSpace: 'nowrap',
+            display: 'block',
+            width: '100%',
+            whiteSpace: isMultiline ? 'pre-wrap' : 'nowrap',
+            wordBreak: isMultiline ? 'break-word' : 'normal',
+            overflowWrap: isMultiline ? 'break-word' : 'normal',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            textOverflow: isMultiline ? 'clip' : 'ellipsis',
           }}
         >
           {value}

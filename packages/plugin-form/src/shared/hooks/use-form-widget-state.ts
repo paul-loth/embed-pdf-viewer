@@ -28,10 +28,7 @@ export function useFormWidgetState(props: AnnotationRendererProps<PdfWidgetAnnoO
   const handleChangeField = useCallback(
     (newField: PdfWidgetAnnoField) => {
       if (!scope) return;
-      scope.setFormFieldValues(pageIndex, annotation, newField).wait(
-        () => {},
-        () => {},
-      );
+      scope.setFormFieldValues(pageIndex, annotation, newField);
     },
     [scope, pageIndex, annotation],
   );

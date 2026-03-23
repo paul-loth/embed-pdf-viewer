@@ -26,6 +26,7 @@ import {
   ViewportPluginPackage,
 } from '@embedpdf/plugin-viewport/react'
 import { HistoryPluginPackage } from '@embedpdf/plugin-history/react'
+import { ExportPluginPackage, useExport } from '@embedpdf/plugin-export/react'
 import {
   useZoom,
   ZoomPluginPackage,
@@ -35,7 +36,7 @@ import {
   FormPluginPackage,
   useFormCapability,
 } from '@embedpdf/plugin-form/react'
-import { Loader2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
+import { Loader2, ZoomIn, ZoomOut, Download } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 const plugins = [
@@ -45,6 +46,9 @@ const plugins = [
   createPluginRegistration(ViewportPluginPackage),
   createPluginRegistration(ScrollPluginPackage),
   createPluginRegistration(RenderPluginPackage),
+  createPluginRegistration(ExportPluginPackage, {
+    defaultFileName: 'form.pdf',
+  }),
   createPluginRegistration(ZoomPluginPackage, {
     defaultZoomLevel: ZoomMode.FitPage,
   }),
@@ -58,19 +62,13 @@ const plugins = [
 ]
 
 const ZoomToolbar = ({ documentId }: { documentId: string }) => {
-  const { provides: zoom, state } = useZoom(documentId)
+  const { provides: zoom } = useZoom(documentId)
+  const { provides: exportApi } = useExport(documentId)
 
   if (!zoom) return null
 
-  const zoomPercentage = Math.round(state.currentZoomLevel * 100)
-
   return (
-    <div className="flex items-center gap-3 border-b border-gray-300 bg-gray-100 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
-      <span className="tracking-wide text-xs font-medium uppercase text-gray-600 dark:text-gray-300">
-        Zoom
-      </span>
-      <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
-
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-300 bg-gray-100 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center gap-1.5">
         <button
           onClick={zoom.zoomOut}
@@ -80,12 +78,6 @@ const ZoomToolbar = ({ documentId }: { documentId: string }) => {
           <ZoomOut size={16} />
         </button>
 
-        <div className="min-w-[56px] rounded-md bg-white px-2 py-1 text-center shadow-sm ring-1 ring-gray-300 dark:bg-gray-700 dark:ring-gray-600">
-          <span className="font-mono text-sm font-medium text-gray-700 dark:text-gray-200">
-            {zoomPercentage}%
-          </span>
-        </div>
-
         <button
           onClick={zoom.zoomIn}
           className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white text-gray-600 shadow-sm ring-1 ring-gray-300 transition-all hover:bg-gray-50 hover:text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-100"
@@ -93,16 +85,29 @@ const ZoomToolbar = ({ documentId }: { documentId: string }) => {
         >
           <ZoomIn size={16} />
         </button>
-
-        <button
-          onClick={() => zoom.requestZoom(ZoomMode.FitPage)}
-          className="ml-1 inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-gray-300 transition-all hover:bg-gray-50 hover:text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-100"
-          title="Reset Zoom to Fit Page"
-        >
-          <RotateCcw size={14} />
-          <span className="hidden sm:inline">Reset</span>
-        </button>
       </div>
+
+      <button
+        onClick={() => exportApi?.download()}
+        disabled={!exportApi}
+        className="inline-flex items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <Download size={16} />
+        Download PDF
+      </button>
+    </div>
+  )
+}
+
+const FormStateHeader = ({ documentId }: { documentId: string }) => {
+  return (
+    <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-800">
+      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+        Form State (JSON)
+      </h3>
+      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        Fill the form on the left to see the state update here.
+      </p>
     </div>
   )
 }
@@ -132,15 +137,8 @@ const FormStateViewer = ({ documentId }: { documentId: string }) => {
   }, [formCapability, documentId])
 
   return (
-    <div className="flex h-full flex-col overflow-hidden border-l border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-      <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-800">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-          Form State (JSON)
-        </h3>
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Fill the form on the left to see the state update here.
-        </p>
-      </div>
+    <div className="flex h-full min-h-[240px] flex-col overflow-hidden border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:border-l lg:border-t-0">
+      <FormStateHeader documentId={documentId} />
       <div className="flex-1 overflow-auto p-4">
         {Object.keys(formValues).length > 0 ? (
           <pre className="text-xs text-gray-800 dark:text-gray-300">
@@ -184,9 +182,9 @@ export const FormViewer = () => {
                   style={{ userSelect: 'none' }}
                 >
                   <ZoomToolbar documentId={activeDocumentId} />
-                  <div className="flex h-[550px]">
+                  <div className="flex flex-col lg:h-[550px] lg:flex-row">
                     {/* Left side: PDF Viewer */}
-                    <div className="relative flex-1">
+                    <div className="relative h-[420px] sm:h-[550px] lg:h-auto lg:flex-1">
                       <Viewport
                         documentId={activeDocumentId}
                         className="absolute inset-0 bg-gray-200 dark:bg-gray-800"
@@ -218,7 +216,7 @@ export const FormViewer = () => {
                     </div>
 
                     {/* Right side: JSON Viewer */}
-                    <div className="w-1/3 min-w-[250px] max-w-[400px]">
+                    <div className="w-full lg:w-1/3 lg:min-w-[250px] lg:max-w-[400px]">
                       <FormStateViewer documentId={activeDocumentId} />
                     </div>
                   </div>

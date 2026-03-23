@@ -448,20 +448,64 @@ export class FormPlugin extends BasePlugin<
         continue;
       }
 
-      const firstEntry = fieldEntries[0];
-      const widget = this.resolveWidgetAnnotation(firstEntry.annotationId, docId);
+      let targetEntry = fieldEntries[0];
+      let widget = this.resolveWidgetAnnotation(targetEntry.annotationId, docId);
       if (!widget) {
         onComplete();
         continue;
       }
 
-      this.setFormFieldValues(firstEntry.pageIndex, widget, { ...widget.field, value }, docId).wait(
+      if (
+        widget.field.type === PDF_FORM_FIELD_TYPE.RADIOBUTTON ||
+        widget.field.type === PDF_FORM_FIELD_TYPE.CHECKBOX
+      ) {
+        for (const entry of fieldEntries) {
+          const w = this.resolveWidgetAnnotation(entry.annotationId, docId);
+          if (w && w.exportValue === value) {
+            widget = w;
+            targetEntry = entry;
+            break;
+          }
+        }
+      }
+
+      this.setFormFieldValues(
+        targetEntry.pageIndex,
+        widget,
+        this.buildImportField(widget, value),
+        docId,
+      ).wait(
         () => onComplete(),
         (error) => onError(error.reason),
       );
     }
 
     return resultTask;
+  }
+
+  private buildImportField(widget: PdfWidgetAnnoObject, value: string): PdfWidgetAnnoField {
+    const field = widget.field;
+
+    if (
+      (field.type === PDF_FORM_FIELD_TYPE.COMBOBOX || field.type === PDF_FORM_FIELD_TYPE.LISTBOX) &&
+      'options' in field
+    ) {
+      return {
+        ...field,
+        value,
+        options: field.options.map((opt) => ({
+          ...opt,
+          isSelected: opt.label === value,
+        })),
+      };
+    }
+
+    if (field.type === PDF_FORM_FIELD_TYPE.CHECKBOX) {
+      const normalizedValue = value === 'Off' ? 'Off' : (widget.exportValue ?? 'Yes');
+      return { ...field, value: normalizedValue };
+    }
+
+    return { ...field, value };
   }
 
   private isToggleField(

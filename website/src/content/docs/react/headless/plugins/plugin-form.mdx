@@ -142,7 +142,7 @@ const AutoFillButton = ({ documentId }: { documentId: string }) => {
 ```
 
 <Callout type="info" title="Checkbox and Radio Button Values">
-  For checkboxes and radio buttons, the value must match the exact **export value** defined in the PDF (e.g. `"Yes"`, `"Off"`, `"Choice1"`). If a checkbox has an export value of `"Yes"`, passing `"Yes"` will check the box, and `"Off"` will uncheck it.
+  Radio buttons still expect the exact **export value** defined in the PDF. Checkboxes are more forgiving: pass `"Off"` to uncheck them, and any other string will be normalized to the widget's actual checked export value.
 </Callout>
 
 ### 4. Listening to Form Ready
@@ -177,9 +177,56 @@ const FormFieldList = ({ documentId }: { documentId: string }) => {
 };
 ```
 
+### 5. Fill Mode vs. Design Mode
+
+Form widgets are rendered by the Annotation Plugin, which means their behavior depends on the current annotation lock mode:
+
+- In **fill mode**, keep the `form` category locked so widgets stay fillable and cannot be transformed.
+- In **design mode**, unlock annotations so the same widgets can be selected, moved, and resized like regular annotations.
+
+```tsx
+import { useAnnotation } from '@embedpdf/plugin-annotation/react';
+
+const fillModeLock = { type: 'include' as const, categories: ['form'] };
+
+const FormModeToggle = ({ documentId }: { documentId: string }) => {
+  const { state, provides } = useAnnotation(documentId);
+
+  const fillMode =
+    state.locked.type === 'include' &&
+    state.locked.categories.includes('form');
+
+  return (
+    <button
+      onClick={() =>
+        provides?.setLocked(fillMode ? { type: 'none' } : fillModeLock)
+      }
+    >
+      {fillMode ? 'Switch to Design Mode' : 'Switch to Fill Mode'}
+    </button>
+  );
+};
+```
+
+When the form category is locked, users can type, toggle, and select values. When unlocked, the widgets behave like annotations again, which is useful if you want to let users adjust placement or size in a custom authoring workflow.
+
+## Live Example — Switching Between Fill and Design Mode
+
+This example shows how to toggle between fill mode and design mode by switching the Annotation Plugin lock state.
+
+import { FormEditModeViewer } from '../../code-examples/headless/form-edit-mode-example';
+
+<CodeExample
+  codePaths={[
+    "content/docs/react/code-examples/headless/form-edit-mode-example.tsx"
+  ]}
+>
+  <FormEditModeViewer />
+</CodeExample>
+
 ## Live Example — Reading Form State
 
-The example below displays a PDF form on the left and a live JSON view of all field values on the right. Try filling in the fields to see the state update in real time.
+The example below displays a PDF form on the left and a live JSON view of all field values on the right. It also includes a download button so you can save the filled PDF with its current form state.
 
 import { FormViewer } from '../../code-examples/headless/form-example';
 
@@ -242,10 +289,10 @@ The `FormCapability` interface provides document-scoped operations. Most methods
 | **`getFormFields(documentId?)`** | Returns an array of `FormFieldInfo` objects describing every field. |
 | **`setFormValues(values, documentId?)`** | Sets multiple field values at once. Keys are field names, values are strings. |
 | **`setFormFieldValues(pageIndex, annotation, newField, documentId?)`** | Updates the field data for a specific widget annotation. |
-| **`selectField(annotationId, options?, documentId?)`** | Focuses a specific field. Pass `{ scroll: true }` to scroll it into view. |
+| **`selectField(annotationId, documentId?)`** | Focuses a specific field. |
 | **`deselectField(documentId?)`** | Removes focus from the currently selected field. |
-| **`selectNextField(options?, documentId?)`** | Moves focus to the next field in tab order. |
-| **`selectPreviousField(options?, documentId?)`** | Moves focus to the previous field in tab order. |
+| **`selectNextField(documentId?)`** | Moves focus to the next field in tab order. |
+| **`selectPreviousField(documentId?)`** | Moves focus to the previous field in tab order. |
 | **`getFieldGroup(annotationId, documentId?)`** | Returns all widget entries sharing the same logical field (including the given annotation). |
 | **`getFieldSiblings(annotationId, documentId?)`** | Returns sibling widget entries sharing the same logical field (excluding the given annotation). |
 | **`forDocument(documentId)`** | Returns a `FormScope` bound to a specific document. |
