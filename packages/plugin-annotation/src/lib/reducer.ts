@@ -28,6 +28,7 @@ import {
   AnnotationState,
   AnnotationDocumentState,
   TrackedAnnotation,
+  LockModeType,
 } from './types';
 import { defaultTools } from './tools/default-tools';
 import { AnnotationTool } from './tools/types';
@@ -60,7 +61,7 @@ export const initialDocumentState = (cfg?: AnnotationPluginConfig): AnnotationDo
   selectedUid: null,
   activeToolId: null,
   hasPendingChanges: false,
-  locked: cfg?.locked ?? { type: 'none' },
+  locked: cfg?.locked ?? { type: LockModeType.None },
 });
 
 // Helper function to patch an annotation in a document state

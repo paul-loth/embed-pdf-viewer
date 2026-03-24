@@ -6,6 +6,7 @@ import { usePdfiumEngine } from '@embedpdf/engines/react'
 import {
   AnnotationLayer,
   AnnotationPluginPackage,
+  LockModeType,
 } from '@embedpdf/plugin-annotation/react'
 import {
   InteractionManagerPluginPackage,
@@ -55,7 +56,7 @@ const plugins = [
   createPluginRegistration(SelectionPluginPackage),
   createPluginRegistration(HistoryPluginPackage),
   createPluginRegistration(AnnotationPluginPackage, {
-    locked: { type: 'include', categories: ['form'] },
+    locked: { type: LockModeType.Include, categories: ['form'] },
   }),
   createPluginRegistration(FormPluginPackage),
 ]

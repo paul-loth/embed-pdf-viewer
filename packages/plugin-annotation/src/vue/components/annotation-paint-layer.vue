@@ -4,6 +4,7 @@
   <PreviewRenderer
     v-for="[toolId, preview] in previews.entries()"
     :key="toolId"
+    :toolId="toolId"
     :preview="preview"
     :scale="scale"
   />

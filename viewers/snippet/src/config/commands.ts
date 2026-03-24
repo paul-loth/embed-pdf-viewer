@@ -7,6 +7,7 @@ import { RotatePlugin } from '@embedpdf/plugin-rotate/preact';
 import {
   ANNOTATION_PLUGIN_ID,
   AnnotationPlugin,
+  LockModeType,
   getToolDefaultsById,
   isHighlightTool,
   isSquigglyTool,
@@ -812,7 +813,7 @@ export const commands: Record<string, Command<State>> = {
         .getPlugin<AnnotationPlugin>(ANNOTATION_PLUGIN_ID)
         ?.provides()
         .forDocument(documentId)
-        .setLocked({ type: 'all' });
+        .setLocked({ type: LockModeType.Include, categories: ['form'] });
     },
     active: ({ state, documentId }) => {
       return !isToolbarOpen(state.plugins, documentId, 'top', 'secondary');
@@ -833,7 +834,7 @@ export const commands: Record<string, Command<State>> = {
         .getPlugin<AnnotationPlugin>(ANNOTATION_PLUGIN_ID)
         ?.provides()
         .forDocument(documentId)
-        .setLocked({ type: 'exclude', categories: ['markup', 'shape', 'redaction'] });
+        .setLocked({ type: LockModeType.Include, categories: ['form'] });
     },
     active: ({ state, documentId }) => {
       return isToolbarOpen(state.plugins, documentId, 'top', 'secondary', 'annotation-toolbar');
@@ -854,7 +855,7 @@ export const commands: Record<string, Command<State>> = {
         .getPlugin<AnnotationPlugin>(ANNOTATION_PLUGIN_ID)
         ?.provides()
         .forDocument(documentId)
-        .setLocked({ type: 'exclude', categories: ['markup', 'shape', 'redaction'] });
+        .setLocked({ type: LockModeType.Include, categories: ['form'] });
     },
     active: ({ state, documentId }) => {
       return isToolbarOpen(state.plugins, documentId, 'top', 'secondary', 'shapes-toolbar');
@@ -875,7 +876,7 @@ export const commands: Record<string, Command<State>> = {
         .getPlugin<AnnotationPlugin>(ANNOTATION_PLUGIN_ID)
         ?.provides()
         .forDocument(documentId)
-        .setLocked({ type: 'exclude', categories: ['form'] });
+        .setLocked({ type: LockModeType.None });
     },
     active: ({ state, documentId }) => {
       return isToolbarOpen(state.plugins, documentId, 'top', 'secondary', 'form-toolbar');
@@ -1007,9 +1008,9 @@ export const commands: Record<string, Command<State>> = {
         .forDocument(documentId);
       if (!scope) return;
       if (scope.isCategoryLocked('form')) {
-        scope.setLocked({ type: 'exclude', categories: ['form'] });
+        scope.setLocked({ type: LockModeType.None });
       } else {
-        scope.setLocked({ type: 'all' });
+        scope.setLocked({ type: LockModeType.Include, categories: ['form'] });
       }
     },
     active: ({ registry, documentId }) => {
@@ -1035,7 +1036,7 @@ export const commands: Record<string, Command<State>> = {
         .getPlugin<AnnotationPlugin>(ANNOTATION_PLUGIN_ID)
         ?.provides()
         .forDocument(documentId)
-        .setLocked({ type: 'exclude', categories: ['markup', 'shape', 'redaction'] });
+        .setLocked({ type: LockModeType.Include, categories: ['form'] });
     },
     active: ({ state, documentId }) => {
       return isToolbarOpen(state.plugins, documentId, 'top', 'secondary', 'redaction-toolbar');
@@ -1101,7 +1102,7 @@ export const commands: Record<string, Command<State>> = {
 
       // If there's a selection, create highlights for it
       if (formattedSelection.length > 0) {
-        annotationScope.setLocked({ type: 'exclude', categories: ['markup', 'shape'] });
+        annotationScope.setLocked({ type: LockModeType.Exclude, categories: ['markup', 'shape'] });
         for (const sel of formattedSelection) {
           const annotationId = uuidV4();
           const createWithText = (text?: string) => {
@@ -1178,7 +1179,7 @@ export const commands: Record<string, Command<State>> = {
 
       // If there's a selection, create underlines for it
       if (formattedSelection.length > 0) {
-        annotationScope.setLocked({ type: 'exclude', categories: ['markup', 'shape'] });
+        annotationScope.setLocked({ type: LockModeType.Exclude, categories: ['markup', 'shape'] });
         for (const sel of formattedSelection) {
           const annotationId = uuidV4();
           const createWithText = (text?: string) => {
@@ -1254,7 +1255,7 @@ export const commands: Record<string, Command<State>> = {
 
       // If there's a selection, create strikeouts for it
       if (formattedSelection.length > 0) {
-        annotationScope.setLocked({ type: 'exclude', categories: ['markup', 'shape'] });
+        annotationScope.setLocked({ type: LockModeType.Exclude, categories: ['markup', 'shape'] });
         for (const sel of formattedSelection) {
           const annotationId = uuidV4();
           const createWithText = (text?: string) => {
@@ -1330,7 +1331,7 @@ export const commands: Record<string, Command<State>> = {
 
       // If there's a selection, create squiggly annotations for it
       if (formattedSelection.length > 0) {
-        annotationScope.setLocked({ type: 'exclude', categories: ['markup', 'shape'] });
+        annotationScope.setLocked({ type: LockModeType.Exclude, categories: ['markup', 'shape'] });
         for (const sel of formattedSelection) {
           const annotationId = uuidV4();
           const createWithText = (text?: string) => {
@@ -2167,7 +2168,7 @@ export const commands: Record<string, Command<State>> = {
           .getPlugin<AnnotationPlugin>(ANNOTATION_PLUGIN_ID)
           ?.provides()
           .forDocument(documentId)
-          .setLocked({ type: 'exclude', categories: ['redaction'] });
+          .setLocked({ type: LockModeType.Exclude, categories: ['redaction'] });
         redactionScope.queueCurrentSelectionAsPending();
         ui.setActiveToolbar('top', 'secondary', 'redaction-toolbar', documentId);
       } else {

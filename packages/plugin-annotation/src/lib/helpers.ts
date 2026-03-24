@@ -8,7 +8,7 @@ import {
   PdfHighlightAnnoObject,
   Rect,
 } from '@embedpdf/models';
-import { LockMode, TrackedAnnotation } from './types';
+import { LockMode, LockModeType, TrackedAnnotation } from './types';
 import { AnnotationTool } from './tools/types';
 
 /* ------------------------------------------------------------------ */
@@ -201,14 +201,14 @@ export function getAnnotationCategories(tool: AnnotationTool | null): string[] {
 /** Check if the category-based LockMode locks annotations with these categories. */
 export function isCategoryLocked(categories: string[], mode: LockMode): boolean {
   switch (mode.type) {
-    case 'none':
+    case LockModeType.None:
       return false;
-    case 'all':
+    case LockModeType.All:
       return true;
-    case 'include':
+    case LockModeType.Include:
       if (categories.length === 0) return false;
       return categories.some((cat) => mode.categories.includes(cat));
-    case 'exclude':
+    case LockModeType.Exclude:
       if (categories.length === 0) return true;
       return !categories.some((cat) => mode.categories.includes(cat));
   }

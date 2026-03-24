@@ -13,6 +13,7 @@ import {
   hasLockedFlag,
   TrackedAnnotation,
   LockMode,
+  LockModeType,
   resolveInteractionProp,
 } from '@embedpdf/plugin-annotation';
 import { PointerEventHandlers, EmbedPdfPointerEvent } from '@embedpdf/plugin-interaction-manager';
@@ -65,7 +66,7 @@ export function Annotations(annotationsProps: AnnotationsProps) {
   const [allSelectedIds, setAllSelectedIds] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [appearanceMap, setAppearanceMap] = useState<AnnotationAppearanceMap<Blob>>({});
-  const [lockedMode, setLockedMode] = useState<LockMode>({ type: 'none' });
+  const [lockedMode, setLockedMode] = useState<LockMode>({ type: LockModeType.None });
   const prevScaleRef = useRef<number>(scale);
 
   const annotationProvides = useMemo(

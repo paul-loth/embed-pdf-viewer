@@ -25,7 +25,7 @@ npm install @embedpdf/plugin-form @embedpdf/plugin-annotation @embedpdf/plugin-i
 
 Import `FormPluginPackage` and the required Annotation Plugin dependencies. Register the annotation plugin dependencies *before* both the Annotation and Form plugins.
 
-```tsx {7-8, 22-25}
+```tsx {8, 23-24}
 import { createPluginRegistration } from '@embedpdf/core'
 import { EmbedPDF } from '@embedpdf/core/react'
 // ... other imports
@@ -94,7 +94,7 @@ When the document is in **locked mode** (the default when no annotation tool is 
 
 You can hook into the form's state using `useFormCapability` to listen to changes or to read the current values of all fields as a `Record<string, string>`. This is useful for mirroring form state to your backend, validating input, or displaying a live preview.
 
-```tsx {1, 4, 8, 11-12}
+```tsx
 import { useFormCapability } from '@embedpdf/plugin-form/react';
 
 const FormStateLogger = ({ documentId }: { documentId: string }) => {
@@ -122,7 +122,7 @@ const FormStateLogger = ({ documentId }: { documentId: string }) => {
 
 You can pre-fill a form with data from a database or API using the `setFormValues` method. Pass an object where the keys are the PDF field names and the values are their new text values.
 
-```tsx {1, 4, 6-14}
+```tsx
 import { useFormCapability } from '@embedpdf/plugin-form/react';
 
 const AutoFillButton = ({ documentId }: { documentId: string }) => {
@@ -185,21 +185,21 @@ Form widgets are rendered by the Annotation Plugin, which means their behavior d
 - In **design mode**, unlock annotations so the same widgets can be selected, moved, and resized like regular annotations.
 
 ```tsx
-import { useAnnotation } from '@embedpdf/plugin-annotation/react';
+import { useAnnotation, LockModeType } from '@embedpdf/plugin-annotation/react';
 
-const fillModeLock = { type: 'include' as const, categories: ['form'] };
+const fillModeLock = { type: LockModeType.Include, categories: ['form'] } as const;
 
 const FormModeToggle = ({ documentId }: { documentId: string }) => {
   const { state, provides } = useAnnotation(documentId);
 
   const fillMode =
-    state.locked.type === 'include' &&
+    state.locked.type === LockModeType.Include &&
     state.locked.categories.includes('form');
 
   return (
     <button
       onClick={() =>
-        provides?.setLocked(fillMode ? { type: 'none' } : fillModeLock)
+        provides?.setLocked(fillMode ? { type: LockModeType.None } : fillModeLock)
       }
     >
       {fillMode ? 'Switch to Design Mode' : 'Switch to Fill Mode'}

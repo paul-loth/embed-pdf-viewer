@@ -100,20 +100,27 @@ export interface RenderAnnotationOptions {
   options?: PdfRenderPageAnnotationOptions;
 }
 
+export enum LockModeType {
+  None = 'none',
+  All = 'all',
+  Include = 'include',
+  Exclude = 'exclude',
+}
+
 /**
  * Controls which annotation categories are locked from UI interaction (selection, drag, resize).
  * Locked annotations let clicks pass through to layers below (e.g. form-filling).
  *
- * - `{ type: 'none' }` -- nothing locked (default, full interaction)
- * - `{ type: 'all' }` -- everything locked
- * - `{ type: 'include', categories: [...] }` -- only listed categories are locked
- * - `{ type: 'exclude', categories: [...] }` -- everything locked except listed categories
+ * - `{ type: LockModeType.None }` -- nothing locked (default, full interaction)
+ * - `{ type: LockModeType.All }` -- everything locked
+ * - `{ type: LockModeType.Include, categories: [...] }` -- only listed categories are locked
+ * - `{ type: LockModeType.Exclude, categories: [...] }` -- everything locked except listed categories
  */
 export type LockMode =
-  | { type: 'none' }
-  | { type: 'all' }
-  | { type: 'include'; categories: string[] }
-  | { type: 'exclude'; categories: string[] };
+  | { type: LockModeType.None }
+  | { type: LockModeType.All }
+  | { type: LockModeType.Include; categories: string[] }
+  | { type: LockModeType.Exclude; categories: string[] };
 
 // Per-document annotation state
 export interface AnnotationDocumentState {
@@ -166,7 +173,7 @@ export interface AnnotationPluginConfig extends BasePluginConfig {
   deactivateToolAfterCreate?: boolean;
   /** When true (default false), select the annotation immediately after creation. */
   selectAfterCreate?: boolean;
-  /** Initial lock mode for new documents. Defaults to `{ type: 'none' }` (nothing locked). */
+  /** Initial lock mode for new documents. Defaults to `{ type: LockModeType.None }` (nothing locked). */
   locked?: LockMode;
   /** When true (default false), automatically enter edit mode after creating an annotation. */
   editAfterCreate?: boolean;

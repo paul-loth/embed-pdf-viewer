@@ -6,6 +6,7 @@ import { usePdfiumEngine } from '@embedpdf/engines/react'
 import {
   AnnotationLayer,
   AnnotationPluginPackage,
+  LockModeType,
   useAnnotation,
 } from '@embedpdf/plugin-annotation/react'
 import {
@@ -35,7 +36,10 @@ import {
 import { FormPluginPackage } from '@embedpdf/plugin-form/react'
 import { Loader2, Lock, LockOpen, ZoomIn, ZoomOut } from 'lucide-react'
 
-const fillModeLock = { type: 'include' as const, categories: ['form'] }
+const fillModeLock = {
+  type: LockModeType.Include,
+  categories: ['form'],
+} as const
 
 const plugins = [
   createPluginRegistration(DocumentManagerPluginPackage, {
@@ -57,7 +61,7 @@ const plugins = [
 ]
 
 const isFillMode = (locked: { type: string; categories?: string[] }) =>
-  locked.type === 'include' && locked.categories?.includes('form')
+  locked.type === LockModeType.Include && locked.categories?.includes('form')
 
 const ModeToolbar = ({ documentId }: { documentId: string }) => {
   const { state, provides } = useAnnotation(documentId)
@@ -102,7 +106,9 @@ const ModeToolbar = ({ documentId }: { documentId: string }) => {
 
         <button
           onClick={() =>
-            provides?.setLocked(fillMode ? { type: 'none' } : fillModeLock)
+            provides?.setLocked(
+              fillMode ? { type: LockModeType.None } : fillModeLock,
+            )
           }
           disabled={!provides}
           className="inline-flex items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"

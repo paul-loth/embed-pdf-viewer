@@ -72,6 +72,7 @@ import {
   AnnotationLayer,
   AnnotationPluginPackage,
   AnnotationPluginConfig,
+  LockModeType,
 } from '@embedpdf/plugin-annotation/preact';
 import { PrintPluginPackage, PrintPluginConfig } from '@embedpdf/plugin-print/preact';
 import {
@@ -320,7 +321,9 @@ const DEFAULTS = {
   thumbnails: { width: 150, gap: 10, buffer: 3, labelHeight: 30 } as ThumbnailPluginConfig,
 
   // Content features
-  annotations: { locked: { type: 'all' } } as AnnotationPluginConfig,
+  annotations: {
+    locked: { type: LockModeType.Include, categories: ['form'] },
+  } as AnnotationPluginConfig,
   search: {} as SearchPluginConfig,
   selection: {} as SelectionPluginConfig,
   bookmarks: {} as BookmarkPluginConfig,

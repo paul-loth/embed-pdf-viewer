@@ -87,5 +87,5 @@
 
 <!-- Render any active previews from any tool -->
 {#each Array.from(previews.entries()) as [toolId, preview] (toolId)}
-  <PreviewRenderer {preview} {scale} />
+  <PreviewRenderer {toolId} {preview} {scale} />
 {/each}
