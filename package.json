@@ -17,7 +17,7 @@
     "build:packages": "turbo run build --filter=\"./packages/*\"",
     "build:viewers": "turbo run build --filter=\"./packages/*\" --filter=\"./viewers/*\"",
     "build:snippet": "turbo run build --filter=\"./packages/*\" --filter=\"./viewers/snippet\"",
-    "vercel-build": "turbo run build --filter=\"@embedpdf/example-vue-tailwind^...\" && pnpm --filter @embedpdf/example-vue-tailwind run build:app",
+    "vercel-build": "turbo run build --concurrency=1 --filter=\"@embedpdf/example-vue-tailwind^...\" && pnpm --filter @embedpdf/example-vue-tailwind run build:app",
     "build:watch": "ROARR_LOG=true turbowatch ./config/turbowatch.config.ts | roarr",
     "watch": "turbo watch",
     "watch:packages": "turbo watch build --filter=\"./packages/*\"",
