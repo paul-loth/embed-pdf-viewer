@@ -1,8 +1,9 @@
 <template>
   <button
+    role="menuitem"
     @click="onClick"
     :class="[
-      'flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-gray-100',
+      'flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none',
       isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700',
     ]"
   >

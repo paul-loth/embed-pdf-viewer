@@ -1,6 +1,17 @@
 <template>
-  <div :class="['flex items-center gap-2 text-gray-600', className]">
-    <svg :class="[sizeClass, 'animate-spin']" fill="none" viewBox="0 0 24 24">
+  <div
+    :class="['flex items-center gap-2 text-gray-600', className]"
+    role="status"
+    aria-live="polite"
+    :aria-label="message || 'Loading'"
+  >
+    <svg
+      :class="[sizeClass, 'animate-spin']"
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
       <path
         class="opacity-75"

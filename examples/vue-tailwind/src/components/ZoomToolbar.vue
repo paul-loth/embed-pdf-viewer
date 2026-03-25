@@ -13,11 +13,15 @@
       <!-- Zoom Percentage Display -->
       <button
         @click="isMenuOpen = !isMenuOpen"
-        class="flex items-center gap-1 rounded px-2 py-0.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+        class="flex items-center gap-1 rounded px-2 py-0.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        :aria-label="`Zoom level ${zoomPercentage}%, open zoom options`"
+        aria-haspopup="menu"
+        :aria-expanded="isMenuOpen"
       >
-        <span>{{ zoomPercentage }}%</span>
+        <span aria-hidden="true">{{ zoomPercentage }}%</span>
         <ChevronDownIcon
           :class="['h-3 w-3 transition-transform', isMenuOpen ? 'rotate-180' : '']"
+          aria-hidden="true"
         />
       </button>
 

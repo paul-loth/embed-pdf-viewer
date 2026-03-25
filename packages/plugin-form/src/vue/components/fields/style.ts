@@ -20,7 +20,7 @@ const baseInputStyle: CSSProperties = {
 export const checkboxStyle: CSSProperties = {
   ...baseStyle,
   borderRadius: 0,
-  backgroundColor: 'transparent',
+  backgroundColor: 'rgba(59, 130, 246, 0.14)',
   borderWidth: 0,
   borderStyle: 'none',
   outline: 'none',

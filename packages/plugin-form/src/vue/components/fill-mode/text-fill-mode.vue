@@ -7,6 +7,7 @@ import { useFormDocumentState } from '../../hooks/use-form';
 import RenderWidget from '../render-widget.vue';
 import TextField from '../fields/text-field.vue';
 import type { TextFieldProps } from '../../../shared/components/types';
+import { formFieldChromeStyle } from './highlight-style';
 
 const props = defineProps<AnnotationRendererProps<PdfWidgetAnnoObject>>();
 const ws = useFormWidgetState(props);
@@ -50,6 +51,7 @@ function handleInputRef(el: HTMLElement | null) {
       position: 'relative',
       pointerEvents: 'auto',
       outline: 'none',
+      ...formFieldChromeStyle(isFocused || editing),
     }"
   >
     <RenderWidget

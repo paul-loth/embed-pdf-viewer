@@ -7,6 +7,7 @@ import { useFormDocumentState } from '../../hooks/use-form';
 import RenderWidget from '../render-widget.vue';
 import ComboboxField from '../fields/combobox-field.vue';
 import type { ComboboxFieldProps } from '../../../shared/components/types';
+import { formFieldChromeStyle } from './highlight-style';
 
 const props = defineProps<AnnotationRendererProps<PdfWidgetAnnoObject>>();
 const ws = useFormWidgetState(props);
@@ -52,8 +53,8 @@ function selectInputRef(el: HTMLElement | null) {
       overflow: 'hidden',
       cursor: ws.isReadOnly.value ? 'default' : 'pointer',
       pointerEvents: 'auto',
-      outline: isFocused ? '2px solid rgba(66, 133, 244, 0.8)' : 'none',
-      outlineOffset: '-2px',
+      position: 'relative',
+      ...formFieldChromeStyle(isFocused),
     }"
   >
     <RenderWidget

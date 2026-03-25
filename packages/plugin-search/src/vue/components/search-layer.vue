@@ -82,6 +82,7 @@ const resultsToShow = computed(() => {
     :style="{
       pointerEvents: 'none',
     }"
+    aria-hidden="true"
     v-bind="$attrs"
   >
     <template v-for="({ result, originalIndex }, idx) in resultsToShow" :key="`result-${idx}`">

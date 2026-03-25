@@ -3,6 +3,7 @@ import type { PdfWidgetAnnoObject } from '@embedpdf/models';
 import type { AnnotationRendererProps } from '@embedpdf/plugin-annotation/vue';
 import { useFormWidgetState } from '../../hooks/use-form-widget-state';
 import RenderWidget from '../render-widget.vue';
+import { formFieldChromeStyle } from './highlight-style';
 
 const props = defineProps<AnnotationRendererProps<PdfWidgetAnnoObject>>();
 const ws = useFormWidgetState(props);
@@ -15,6 +16,8 @@ const ws = useFormWidgetState(props);
       height: '100%',
       overflow: 'hidden',
       pointerEvents: 'auto',
+      position: 'relative',
+      ...formFieldChromeStyle(false),
     }"
   >
     <RenderWidget

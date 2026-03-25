@@ -3,14 +3,14 @@
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
     :class="[
-      'absolute bottom-4 left-1/2 z-[1000] -translate-x-1/2 transition-opacity duration-200',
+      'absolute bottom-4 left-1/2 z-[1000] -translate-x-1/2 transition-opacity duration-200 focus-within:opacity-100',
       isVisible ? 'opacity-100' : 'opacity-0',
     ]"
   >
     <div class="flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 p-1 shadow-lg">
       <!-- Previous Button -->
       <button
-        @click="handlePreviousPage"
+        @click.prevent="handlePreviousPage"
         :disabled="state.currentPage === 1"
         class="rounded p-1 text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-transparent"
         aria-label="Previous page"
@@ -20,19 +20,22 @@
 
       <!-- Page Input -->
       <form @submit.prevent="handlePageChange" class="flex items-center gap-2">
+        <label for="page-number-input" class="sr-only">Page number</label>
         <input
+          id="page-number-input"
           v-model="inputValue"
           type="text"
           name="page"
+          :aria-label="`Page ${inputValue} of ${state.totalPages}`"
           @input="handleInput"
           class="h-7 w-10 rounded border border-gray-300 bg-white px-1 text-center text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
-        <span class="text-sm text-gray-600"> {{ state.totalPages }}</span>
+        <span class="text-sm text-gray-600" aria-hidden="true"> {{ state.totalPages }}</span>
       </form>
 
       <!-- Next Button -->
       <button
-        @click="handleNextPage"
+        @click.prevent="handleNextPage"
         :disabled="state.currentPage === state.totalPages"
         class="rounded p-1 text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-transparent"
         aria-label="Next page"
@@ -128,17 +131,13 @@ const handlePageChange = () => {
   }
 };
 
-const handlePreviousPage = (e: MouseEvent) => {
-  e.preventDefault();
-  (e.currentTarget as HTMLButtonElement).blur();
+const handlePreviousPage = () => {
   if (state.value.currentPage > 1 && scroll.value) {
     scroll.value.scrollToPreviousPage();
   }
 };
 
-const handleNextPage = (e: MouseEvent) => {
-  e.preventDefault();
-  (e.currentTarget as HTMLButtonElement).blur();
+const handleNextPage = () => {
   if (state.value.currentPage < state.value.totalPages && scroll.value) {
     scroll.value.scrollToNextPage();
   }

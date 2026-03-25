@@ -123,6 +123,13 @@ export interface PdfMetadataObject {
   trapped: PdfTrappedStatus | null;
 
   /**
+   * BCP-47 language tag for the document (e.g. "en-US").
+   * Read from the PDF Info dictionary "Lang" entry or document catalog /Lang.
+   * Null when not specified.
+   */
+  language?: string | null;
+
+  /**
    * Non-predefined Info dictionary entries.
    */
   custom?: Record<string, string | null>;

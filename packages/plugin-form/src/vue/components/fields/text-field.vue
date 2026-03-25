@@ -32,9 +32,9 @@ const computedFontPx = computed(() => props.annotation.fontSize * props.scale);
 const iosCompensation = useIOSZoomPrevention(computedFontPx, true);
 
 const visualStyle = computed<CSSProperties>(() => ({
-  backgroundColor: props.annotation.color ?? 'transparent',
+  backgroundColor: props.annotation.color ?? 'rgba(59, 130, 246, 0.14)',
   borderStyle: 'solid',
-  borderColor: props.annotation.strokeColor ?? 'transparent',
+  borderColor: props.annotation.strokeColor ?? 'rgba(37, 99, 235, 0.9)',
   borderWidth: `${bw.value}px`,
   color: props.annotation.fontColor,
   ...fontCss.value,
@@ -80,9 +80,9 @@ const combContainerStyle = computed<CSSProperties>(() => ({
   height: '100%',
   borderRadius: 0,
   boxSizing: 'border-box',
-  backgroundColor: props.annotation.color ?? 'transparent',
+  backgroundColor: props.annotation.color ?? 'rgba(59, 130, 246, 0.14)',
   borderStyle: 'solid',
-  borderColor: props.annotation.strokeColor ?? 'transparent',
+  borderColor: props.annotation.strokeColor ?? 'rgba(37, 99, 235, 0.9)',
   borderWidth: `${bw.value}px`,
 }));
 

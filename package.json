@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "turbo run dev --parallel",
     "dev:vanilla": "pnpm --filter @embedpdf/example-vanilla run dev",
+    "dev:vue-form": "pnpm --filter @embedpdf/example-vue-tailwind run dev",
     "clean": "turbo run clean && rimraf .turbo/cache",
     "build:fresh": "pnpm clean && turbo run build",
     "build": "turbo run build",
