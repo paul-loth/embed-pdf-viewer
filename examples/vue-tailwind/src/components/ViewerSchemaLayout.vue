@@ -19,6 +19,8 @@
           </div>
           <DocumentPasswordPrompt v-else-if="isError" :documentState="documentState" />
           <div v-else-if="isLoaded" class="relative h-full w-full">
+            <!-- Off-screen full-document text for screen readers (all pages) -->
+            <OffscreenTextDocument :documentId="documentId" />
             <GlobalPointerProvider :documentId="documentId">
               <Viewport class="bg-gray-100" :documentId="documentId">
                 <ZoomGestureWrapper :documentId="documentId">
@@ -39,6 +41,10 @@
                           :documentId="documentId"
                           :pageIndex="page.pageIndex"
                           style="pointer-events: none"
+                        />
+                        <TextLayer
+                          :documentId="documentId"
+                          :pageIndex="page.pageIndex"
                         />
                         <SearchLayer :documentId="documentId" :pageIndex="page.pageIndex" />
                         <MarqueeZoom :documentId="documentId" :pageIndex="page.pageIndex" />
@@ -93,6 +99,7 @@ import { Rotate } from '@embedpdf/plugin-rotate/vue';
 import { RenderLayer } from '@embedpdf/plugin-render/vue';
 import { TilingLayer } from '@embedpdf/plugin-tiling/vue';
 import { SearchLayer } from '@embedpdf/plugin-search/vue';
+import { TextLayer, OffscreenTextDocument } from '@embedpdf/plugin-text-layer/vue';
 import { MarqueeZoom, ZoomGestureWrapper } from '@embedpdf/plugin-zoom/vue';
 import { MarqueeCapture } from '@embedpdf/plugin-capture/vue';
 import { SelectionLayer } from '@embedpdf/plugin-selection/vue';

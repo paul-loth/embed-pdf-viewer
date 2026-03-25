@@ -451,6 +451,7 @@ export class PdfiumNative implements IPdfiumExecutor {
       creationDate: creationRaw ? (pdfDateToDate(creationRaw) ?? null) : null,
       modificationDate: modRaw ? (pdfDateToDate(modRaw) ?? null) : null,
       trapped: this.getMetaTrapped(ctx.docPtr),
+      language: this.readMetaText(ctx.docPtr, 'Lang'),
       custom: this.readAllMeta(ctx.docPtr, true),
     };
 

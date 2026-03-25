@@ -53,8 +53,8 @@ const chars = computed(() => (value.value ?? '').split(''));
     :style="{
       position: 'absolute',
       inset: '0',
-      background: object.color ?? 'rgba(255, 255, 255, 0.9)',
-      border: `${borderWidth}px solid ${object.strokeColor ?? 'rgba(0, 0, 0, 0.2)'}`,
+      background: object.color ?? 'rgba(59, 130, 246, 0.14)',
+      border: `${borderWidth}px solid ${object.strokeColor ?? 'rgba(37, 99, 235, 0.9)'}`,
       outline: isHovered || props.isSelected ? '1px solid rgba(66, 133, 244, 0.5)' : 'none',
       outlineOffset: '-1px',
       boxSizing: 'border-box',
@@ -81,7 +81,7 @@ const chars = computed(() => (value.value ?? '').split(''));
             alignItems: 'center',
             justifyContent: 'center',
             borderRight:
-              i < maxLen - 1 ? `1px solid ${object.strokeColor ?? 'rgba(0, 0, 0, 0.2)'}` : 'none',
+              i < maxLen - 1 ? `1px solid ${object.strokeColor ?? 'rgba(37, 99, 235, 0.9)'}` : 'none',
             boxSizing: 'border-box',
             fontSize: `${fontSize}px`,
             fontFamily: fontCss.fontFamily,

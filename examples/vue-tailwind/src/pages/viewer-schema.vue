@@ -7,7 +7,13 @@
     <LoadingSpinner />
   </div>
 
-  <div v-else ref="containerRef" class="flex h-screen flex-1 flex-col overflow-hidden">
+  <div
+    v-else
+    ref="containerRef"
+    class="flex h-screen flex-1 flex-col overflow-hidden"
+    role="application"
+    aria-label="PDF Viewer"
+  >
     <NavigationBar />
 
     <div class="flex flex-1 select-none flex-col overflow-hidden">
@@ -74,6 +80,7 @@ import { FormPluginPackage } from '@embedpdf/plugin-form/vue';
 import { CommandsPluginPackage } from '@embedpdf/plugin-commands/vue';
 import { I18nPluginPackage } from '@embedpdf/plugin-i18n/vue';
 import { UIPluginPackage, UIProvider } from '@embedpdf/plugin-ui/vue';
+import { TextLayerPluginPackage } from '@embedpdf/plugin-text-layer/vue';
 import TabBar from '../components/TabBar.vue';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
 import NavigationBar from '../components/NavigationBar.vue';
@@ -184,13 +191,17 @@ const plugins = computed(() => [
     commands,
   }),
   createPluginRegistration(I18nPluginPackage, {
-    defaultLocale: 'nl',
+    defaultLocale: 'en',
     locales: [englishTranslations, germanTranslations, spanishTranslations, dutchTranslations],
     paramResolvers,
   }),
   // UI plugin - provides schema-driven UI rendering
   createPluginRegistration(UIPluginPackage, {
     schema: viewerUISchema,
+  }),
+  createPluginRegistration(TextLayerPluginPackage, {
+    enabled: true,
+    maxCachedPages: 30,
   }),
 ]);
 

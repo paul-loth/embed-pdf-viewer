@@ -58,6 +58,7 @@
     "@embedpdf/plugin-spread": "workspace:*",
     "@embedpdf/plugin-thumbnail": "workspace:*",
     "@embedpdf/plugin-tiling": "workspace:*",
+    "@embedpdf/plugin-text-layer": "workspace:*",
     "@embedpdf/plugin-ui": "workspace:*",
     "@embedpdf/plugin-view-manager": "workspace:*",
     "@embedpdf/plugin-viewport": "workspace:*",

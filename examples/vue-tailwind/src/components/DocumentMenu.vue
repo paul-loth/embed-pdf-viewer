@@ -5,6 +5,8 @@
       :isActive="isMenuOpen"
       aria-label="Document Menu"
       title="Document Menu"
+      aria-haspopup="menu"
+      :aria-expanded="isMenuOpen"
     >
       <MenuIcon class="h-4 w-4" />
     </ToolbarButton>

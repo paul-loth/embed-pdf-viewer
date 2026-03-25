@@ -5,6 +5,8 @@
       :isActive="isOpen"
       aria-label="Page Settings"
       title="Page Settings"
+      aria-haspopup="menu"
+      :aria-expanded="isOpen"
     >
       <SettingsIcon class="h-4 w-4" />
     </ToolbarButton>

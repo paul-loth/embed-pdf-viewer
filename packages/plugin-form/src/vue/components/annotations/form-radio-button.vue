@@ -25,8 +25,8 @@ const borderWidth = computed(() => (object.value.strokeWidth ?? 1) * props.scale
     :style="{
       position: 'absolute',
       inset: '0',
-      background: object.color ?? '#FFFFFF',
-      border: `${borderWidth}px solid ${object.strokeColor ?? '#000000'}`,
+      background: object.color ?? 'rgba(59, 130, 246, 0.14)',
+      border: `${borderWidth}px solid ${object.strokeColor ?? 'rgba(37, 99, 235, 0.9)'}`,
       borderRadius: '50%',
       outline: isHovered || props.isSelected ? '1px solid rgba(66, 133, 244, 0.5)' : 'none',
       outlineOffset: '-1px',

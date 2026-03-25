@@ -4,7 +4,7 @@
     <div class="flex-1 overflow-hidden">
       <ThumbnailsPane :documentId="props.documentId" :style="{ width: '100%', height: '100%' }">
         <template #default="{ meta }">
-          <div
+          <button
             :style="{
               position: 'absolute',
               width: '100%',
@@ -13,11 +13,17 @@
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              background: 'none',
+              border: 'none',
+              padding: 0,
               cursor: 'pointer',
             }"
+            :aria-label="`Go to page ${meta.pageIndex + 1}`"
+            :aria-current="getIsActive(meta.pageIndex).value ? 'page' : undefined"
             @click="handleClick(meta.pageIndex)"
           >
             <div
+              aria-hidden="true"
               :style="{
                 width: meta.width + 'px',
                 height: meta.height + 'px',
@@ -36,6 +42,7 @@
               />
             </div>
             <div
+              aria-hidden="true"
               :style="{
                 height: meta.labelHeight + 'px',
                 display: 'flex',
@@ -46,7 +53,7 @@
             >
               <span class="text-xs text-gray-600">{{ meta.pageIndex + 1 }}</span>
             </div>
-          </div>
+          </button>
         </template>
       </ThumbnailsPane>
     </div>
@@ -57,7 +64,6 @@
 import { computed } from 'vue';
 import { ThumbnailsPane, ThumbImg } from '@embedpdf/plugin-thumbnail/vue';
 import { useScroll } from '@embedpdf/plugin-scroll/vue';
-import { CloseIcon } from './icons';
 
 const props = defineProps<{
   documentId: string;

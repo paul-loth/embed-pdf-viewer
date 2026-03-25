@@ -8,19 +8,26 @@
   >
     <!-- Tabs panel -->
     <template v-if="content.type === 'tabs' && availableTabs.length > 0">
-      <div class="flex gap-2 border-b border-gray-200 bg-gray-50 p-2">
+      <div
+        ref="desktopTablistRef"
+        class="flex gap-2 border-b border-gray-200 bg-gray-50 p-2"
+        role="tablist"
+        :aria-label="schema.id"
+      >
         <button
           v-for="tab in availableTabs"
           :key="tab.id"
           type="button"
-          :class="`flex-1 rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+          :class="`flex-1 rounded px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 ${
             tab.id === activeTabId
               ? 'bg-white text-gray-900 shadow-sm'
               : 'text-gray-600 hover:text-gray-900'
           }`"
           @click="handleTabSelect(tab.id)"
+          @keydown="(e) => handleTabKeyDown(e, tab.id, availableTabs, 'desktop')"
           role="tab"
           :aria-selected="tab.id === activeTabId"
+          :tabindex="tab.id === activeTabId ? 0 : -1"
         >
           {{ translate(tab.labelKey || tab.id, { fallback: tab.label || tab.id }) }}
         </button>
@@ -58,6 +65,9 @@
       :class="`fixed bottom-0 left-0 right-0 z-50 ${heightClass} flex flex-col rounded-t-2xl bg-white shadow-2xl transition-all duration-300`"
       :style="{ transform: `translateY(${dragOffset}px)` }"
       :data-panel-id="schema.id"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="activeTab ? translate(activeTab.labelKey || activeTab.id, { fallback: activeTab.label || activeTab.id }) : schema.id"
     >
       <!-- Drag Handle & Header -->
       <div
@@ -81,20 +91,25 @@
       <!-- Tabs (mobile) -->
       <div
         v-if="content.type === 'tabs' && availableTabs.length > 0"
+        ref="mobileTablistRef"
         class="flex gap-2 border-b border-gray-200 bg-gray-50 p-2"
+        role="tablist"
+        :aria-label="schema.id"
       >
         <button
           v-for="tab in availableTabs"
           :key="tab.id"
           type="button"
-          :class="`flex-1 rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+          :class="`flex-1 rounded px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 ${
             tab.id === activeTabId
               ? 'bg-white text-gray-900 shadow-sm'
               : 'text-gray-600 hover:text-gray-900'
           }`"
           @click="handleTabSelect(tab.id)"
+          @keydown="(e) => handleTabKeyDown(e, tab.id, availableTabs, 'mobile')"
           role="tab"
           :aria-selected="tab.id === activeTabId"
+          :tabindex="tab.id === activeTabId ? 0 : -1"
         >
           {{ translate(tab.labelKey || tab.id, { fallback: tab.label || tab.id }) }}
         </button>
@@ -121,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import type { SidebarRendererProps } from '@embedpdf/plugin-ui/vue';
 import { useUICapability, useUIState, useItemRenderer } from '@embedpdf/plugin-ui/vue';
 import { useTranslations } from '@embedpdf/plugin-i18n/vue';
@@ -141,6 +156,48 @@ const { provides } = useUICapability();
 const { state: uiState } = useUIState(props.documentId);
 const { renderCustomComponent } = useItemRenderer();
 const { translate } = useTranslations(props.documentId);
+
+const desktopTablistRef = ref<HTMLDivElement | null>(null);
+const mobileTablistRef = ref<HTMLDivElement | null>(null);
+
+type TabItem = { id: string; label?: string; labelKey?: string };
+
+async function handleTabKeyDown(
+  e: KeyboardEvent,
+  tabId: string,
+  tabs: TabItem[],
+  context: 'desktop' | 'mobile',
+) {
+  const idx = tabs.findIndex((t) => t.id === tabId);
+  let targetId: string | undefined;
+
+  switch (e.key) {
+    case 'ArrowRight':
+      e.preventDefault();
+      targetId = tabs[(idx + 1) % tabs.length]?.id;
+      break;
+    case 'ArrowLeft':
+      e.preventDefault();
+      targetId = tabs[(idx - 1 + tabs.length) % tabs.length]?.id;
+      break;
+    case 'Home':
+      e.preventDefault();
+      targetId = tabs[0]?.id;
+      break;
+    case 'End':
+      e.preventDefault();
+      targetId = tabs[tabs.length - 1]?.id;
+      break;
+  }
+
+  if (targetId) {
+    handleTabSelect(targetId);
+    await nextTick();
+    const container = context === 'desktop' ? desktopTablistRef.value : mobileTablistRef.value;
+    const el = container?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+    el?.focus();
+  }
+}
 
 // Mobile detection
 const isMobile = ref(false);

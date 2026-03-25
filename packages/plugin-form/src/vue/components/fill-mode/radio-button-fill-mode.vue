@@ -6,6 +6,7 @@ import type { AnnotationRendererProps } from '@embedpdf/plugin-annotation/vue';
 import { useFormWidgetState } from '../../hooks/use-form-widget-state';
 import { useFormDocumentState } from '../../hooks/use-form';
 import RenderWidget from '../render-widget.vue';
+import { formFieldChromeStyle } from './highlight-style';
 
 const props = defineProps<AnnotationRendererProps<PdfWidgetAnnoObject>>();
 const ws = useFormWidgetState(props);
@@ -67,8 +68,9 @@ function handleKeyDown(e: KeyboardEvent) {
       overflow: 'hidden',
       cursor: ws.isReadOnly.value ? 'default' : 'pointer',
       pointerEvents: 'auto',
-      outline: isFocused ? '2px solid rgba(66, 133, 244, 0.8)' : 'none',
-      outlineOffset: '-2px',
+      position: 'relative',
+      borderRadius: '50%',
+      ...formFieldChromeStyle(isFocused),
     }"
   >
     <RenderWidget

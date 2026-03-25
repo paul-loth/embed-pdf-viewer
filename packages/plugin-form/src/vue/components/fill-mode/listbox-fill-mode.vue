@@ -7,6 +7,7 @@ import { useFormDocumentState } from '../../hooks/use-form';
 import RenderWidget from '../render-widget.vue';
 import ListboxField from '../fields/listbox-field.vue';
 import type { ListboxFieldProps } from '../../../shared/components/types';
+import { formFieldChromeStyle } from './highlight-style';
 
 const props = defineProps<AnnotationRendererProps<PdfWidgetAnnoObject>>();
 const ws = useFormWidgetState(props);
@@ -52,8 +53,8 @@ function handleBlur() {
       overflow: 'hidden',
       cursor: ws.isReadOnly.value ? 'default' : 'pointer',
       pointerEvents: 'auto',
-      outline: isFocused && !editing ? '2px solid rgba(66, 133, 244, 0.8)' : 'none',
-      outlineOffset: '-2px',
+      position: 'relative',
+      ...formFieldChromeStyle(isFocused || editing),
     }"
   >
     <ListboxField

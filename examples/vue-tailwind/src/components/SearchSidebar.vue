@@ -9,16 +9,18 @@
         <input
           ref="inputRef"
           v-model="inputValue"
-          type="text"
+          type="search"
           placeholder="Search"
+          aria-label="Search document"
           class="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <button
           v-if="inputValue"
           @click="clearInput"
+          aria-label="Clear search"
           class="absolute inset-y-0 right-0 flex items-center pr-3"
         >
-          <CloseIcon class="h-4 w-4 text-gray-400 hover:text-gray-600" />
+          <CloseIcon class="h-4 w-4 text-gray-400 hover:text-gray-600" aria-hidden="true" />
         </button>
       </div>
 
@@ -49,12 +51,14 @@
         </label>
       </div>
 
-      <!-- Results count and navigation -->
+      <!-- Results count and navigation — aria-live so screen readers hear new counts -->
       <div
         v-if="state.active && !state.loading && state.total > 0"
         class="mt-3 flex items-center justify-between"
       >
-        <span class="text-sm text-gray-600">{{ state.total }} results found</span>
+        <span role="status" aria-live="polite" class="text-sm text-gray-600">
+          {{ state.total }} result{{ state.total !== 1 ? 's' : '' }} found
+        </span>
         <div v-if="state.total > 1" class="flex gap-1">
           <button
             @click="provides?.previousResult()"

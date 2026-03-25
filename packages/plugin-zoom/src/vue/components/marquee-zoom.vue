@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="rect"
+    aria-hidden="true"
     :style="{
       position: 'absolute',
       pointerEvents: 'none',
